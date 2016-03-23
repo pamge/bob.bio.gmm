@@ -46,6 +46,16 @@ def add_parallel_gmm_options(parsers, sub_module = None):
         help = 'Specify the first iteration for the IVector training (i.e. to restart from there)')
 
 
+  if sub_module == 'isv':
+    sub_dir_group.add_argument('--isv-directory',  default = 'isv_temp',
+        help = 'The sub-directory (relative to --temp-directory), where intermediate isv base and the accumulator files should be stored')
+
+    flag_group.add_argument('-i', '--isv-start-iteration', type=int, default=0,
+        help = 'Specify the first iteration for the ISV Base (U matrix) training (i.e. to restart from there)')
+
+
+
+
 # Functions to be added to the FileSelector class, once it is instantiated
 def _kmeans_intermediate_file(self, round):
   return os.path.join(self.directories['kmeans'], 'round_%05d' % round, 'kmeans.hdf5')
@@ -65,6 +75,14 @@ def _ivector_intermediate_file(self, round):
 
 def _ivector_stats_file(self, round, start_index, end_index):
   return os.path.join(self.directories['ivector'], 'round_%05d' % round, 'stats-%05d-%05d.hdf5' % (start_index, end_index))
+
+
+def _isv_intermediate_file(self, round):
+  return os.path.join(self.directories['isv'], 'round_%05d' % round, 'isv.hdf5')
+
+def _isv_stats_file(self, round, start_index, end_index):
+  return os.path.join(self.directories['isv'], 'round_%05d' % round, 'stats-%05d-%05d.hdf5' % (start_index, end_index))
+
 
 
 def initialize_parallel_gmm(args, sub_module = None):
@@ -104,3 +122,14 @@ def initialize_parallel_gmm(args, sub_module = None):
       fs.directories['whitened'] = os.path.join(args.temp_directory, sub_dir, args.whitened_directory)
       fs.directories['lda_projected'] = os.path.join(args.temp_directory, sub_dir, args.lda_projected_directory)
       fs.directories['wccn_projected'] = os.path.join(args.temp_directory, sub_dir, args.wccn_projected_directory)
+
+    elif sub_module == 'isv':
+      fs.isv_intermediate_file = types.MethodType(_isv_intermediate_file, fs)
+      fs.isv_stats_file = types.MethodType(_isv_stats_file, fs)
+
+      fs.directories['isv'] = os.path.join(args.temp_directory, sub_dir, args.isv_directory)
+      fs.isv_file = os.path.join(args.temp_directory, sub_dir, "isv.hdf5")
+    
+    
+    
+    

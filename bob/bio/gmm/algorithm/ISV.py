@@ -116,6 +116,14 @@ class ISV (GMM):
     # Load Enroller
     hdf5file.cd('/Enroller')
     self.load_isv(hdf5file)
+    
+  def read_gmm_stats(self, gmm_stats_file):
+    """Reads GMM stats from A LIST OF files."""
+    data = []
+    for f in gmm_stats_file:
+      data.append(bob.learn.em.GMMStats(bob.io.base.HDF5File(f)))
+
+    return data
 
 
   #######################################################

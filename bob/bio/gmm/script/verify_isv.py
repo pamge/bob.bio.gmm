@@ -30,7 +30,7 @@ def parse_arguments(command_line_parameters, exclude_resources_from = []):
   # Add sub-tasks that can be executed by this script
   parser = parsers['main']
   parser.add_argument('--sub-task',
-      choices = ('preprocess', 'train-extractor', 'extract', 'normalize-features', 'kmeans-init', 'kmeans-e-step', 'kmeans-m-step', 'gmm-init', 'gmm-e-step', 'gmm-m-step', 'gmm-project', 'train-isv', 'project', 'enroll', 'compute-scores', 'concatenate'),
+      choices = ('preprocess', 'train-extractor', 'extract', 'normalize-features', 'kmeans-init', 'kmeans-e-step', 'kmeans-m-step', 'gmm-init', 'gmm-e-step', 'gmm-m-step', 'gmm-project', 'isv-e-step', 'isv-m-step','save-projector', 'project', 'enroll', 'compute-scores', 'concatenate'),
       help = argparse.SUPPRESS) #'Executes a subtask (FOR INTERNAL USE ONLY!!!)'
   parser.add_argument('--iteration', type = int,
       help = argparse.SUPPRESS) #'Which type of models to generate (Normal or TModels)'
@@ -67,6 +67,9 @@ def add_isv_jobs(args, job_ids, deps, submitter):
 
   # first, add gmm jobs
   job_ids, deps = add_gmm_jobs(args, job_ids, deps, submitter)
+  
+  # now, add the extra steps for ivector
+  algorithm = tools.base(args.algorithm)  
 
   # now, add two extra steps for ISV
   if not args.skip_isv:
@@ -79,12 +82,39 @@ def add_isv_jobs(args, job_ids, deps, submitter):
             **args.grid.projection_queue)
     deps.append(job_ids['gmm-projection'])
 
-    job_ids['isv-training'] = submitter.submit(
-            '--sub-task train-isv',
-            name = 'train-isv',
-            dependencies = deps,
-            **args.grid.training_queue)
-    deps.append(job_ids['isv-training'])
+    # several iterations of E and M steps
+
+    for iteration in range(args.isv_start_iteration, algorithm.isv_training_iterations):
+      # E-step
+      job_ids['isv-e-step'] = submitter.submit(
+              '--sub-task isv-e-step --iteration %d' % iteration,
+              name='isv-e-%d' % iteration,
+              number_of_parallel_jobs = args.grid.number_of_projection_jobs,
+              dependencies = [job_ids['isv-m-step']] if iteration != args.isv_start_iteration else deps,
+              **args.grid.projection_queue)
+
+      # M-step
+      job_ids['isv-m-step'] = submitter.submit(
+              '--sub-task isv-m-step --iteration %d' % iteration,
+              name='isv-m-%d' % iteration,
+              dependencies = [job_ids['isv-e-step']],
+              **args.grid.training_queue)
+    deps.append(job_ids['isv-m-step'])
+
+    job_ids['save-projector'] = submitter.submit(
+          '--sub-task save-projector',
+          name = 'save-projector',
+          dependencies = deps,
+          **args.grid.training_queue)
+    deps.append(job_ids['save-projector'])
+
+
+    #job_ids['isv-training'] = submitter.submit(
+            #'--sub-task train-isv',
+            #name = 'train-isv',
+            #dependencies = deps,
+            #**args.grid.training_queue)
+    #deps.append(job_ids['isv-training'])
 
   return job_ids, deps
 
@@ -101,7 +131,7 @@ def execute(args):
     return True
 
   # now, check what we can do
-  algorithm = tools.base(args.algorithm)
+  algorithm = tools.base(args.algorithm)    
 
   # the file selector object
   fs = tools.FileSelector.instance()
@@ -113,11 +143,34 @@ def execute(args):
         indices = base_tools.indices(fs.training_list('extracted', 'train_projector'), args.grid.number_of_projection_jobs),
         force = args.force)
 
-  # train the feature projector
-  elif args.sub_task == 'train-isv':
-    tools.train_isv(
+  elif args.sub_task == 'isv-e-step':
+    tools.isv_estep(
         algorithm,
+        args.iteration,
+        indices = base_tools.indices(fs.training_list('projected_gmm', 'train_projector', arrange_by_client=True), args.grid.number_of_projection_jobs),
         force = args.force)
+
+  # train the feature projector
+  elif args.sub_task == 'isv-m-step':
+    tools.isv_mstep(
+        algorithm,
+        args.iteration,
+        number_of_parallel_jobs = args.grid.number_of_projection_jobs,
+        clean = args.clean_intermediate,
+        force = args.force)
+
+
+  elif args.sub_task == 'save-projector':
+    tools.save_isv_projector(
+        algorithm,
+        force=args.force)
+
+
+  # train the feature projector
+  #elif args.sub_task == 'train-isv':
+    #tools.train_isv(
+        #algorithm,
+        #force = args.force)
 
   else:
     # Not our keyword...
@@ -169,7 +222,7 @@ def main(command_line_parameters = None):
   try:
     # do the command line parsing
     args = parse_arguments(command_line_parameters)
-
+    
     # perform face verification test
     verify(args, command_line_parameters)
   except Exception as e:
