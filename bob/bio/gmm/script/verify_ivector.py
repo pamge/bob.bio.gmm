@@ -23,7 +23,7 @@ def parse_arguments(command_line_parameters, exclude_resources_from = []):
   tools.add_parallel_gmm_options(parsers, sub_module = 'ivector')
 
   # override some parameters
-  parsers['config'].add_argument('-a', '--algorithm', metavar = 'x', nargs = '+', default = ['ivector'],
+  parsers['config'].add_argument('-a', '--algorithm', metavar = 'x', nargs = '+', default = ['ivector-cosine'],
       help = 'Face recognition; only GMM-related algorithms are allowed')
 
 
@@ -57,6 +57,13 @@ def parse_arguments(command_line_parameters, exclude_resources_from = []):
   # assert that the algorithm is a GMM
   if tools.base(args.algorithm).__class__ != algorithm.IVector:
     raise ValueError("The given algorithm %s is not a (pure) IVector algorithm" % type(args.algorithm))
+
+  # check if one of the parameters is given wothout the sub-task
+  if args.sub_task is None:
+    if args.iteration is not None: raise ValueError("The option --iteration is an internal option and cannot be used to define experiments")
+    if args.model_type is not None: raise ValueError("The option --model-type is an internal option and cannot be used to define experiments")
+    if args.score_type is not None: raise ValueError("The option --score-type is an internal option and cannot be used to define experiments")
+    if args.group is not None: raise ValueError("The option --group is an internal option and cannot be used to define experiments; did you mean to use --groups?")
 
   return args
 

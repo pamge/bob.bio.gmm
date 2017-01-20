@@ -49,8 +49,8 @@ setup(
     version = open("version.txt").read().rstrip(),
     description = 'Tools for running biometric recognition experiments using GMM-based approximation',
 
-    url = 'https://www.github.com/bioidiap/bob.bio.gmm',
-    license = 'GPLv3',
+    url = 'https://gitlab.idiap.ch/bob/bob.bio.gmm',
+    license = 'BSD',
     author = '<YourName>',
     author_email = '<YourEmail>',
     keywords = 'bob, biometric recognition, evaluation',
@@ -80,7 +80,7 @@ setup(
     #
     # Our database packages are good examples of namespace implementations
     # using several layers. You can check them out here:
-    # https://github.com/idiap/bob/wiki/Satellite-Packages
+    # https://www.idiap.ch/software/bob/packages
 
 
     # This entry defines which scripts you will have inside the 'bin' directory
@@ -137,7 +137,7 @@ setup(
       'Framework :: Bob',
       'Development Status :: 3 - Alpha',
       'Intended Audience :: Developers',
-      'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
+      'License :: OSI Approved :: BSD License',
       'Natural Language :: English',
       'Programming Language :: Python',
       'Topic :: Scientific/Engineering :: Artificial Intelligence',
