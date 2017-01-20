@@ -51,6 +51,7 @@ def isv_estep(algorithm, iteration, indices, force=False):
     # Load data
     training_list = fs.training_list('projected_gmm', 'train_projector', arrange_by_client=True)
     data = [algorithm.read_gmm_stats(training_list[i]) for i in range(indices[0], indices[1])]
+    data_initialize = [algorithm.read_gmm_stats(training_list[i]) for i in range(0,len(training_list))]
 
     # Load machine
     if iteration:
@@ -61,8 +62,8 @@ def isv_estep(algorithm, iteration, indices, force=False):
       # create new ISV Base
       isv_base = bob.learn.em.ISVBase(algorithm.ubm, algorithm.subspace_dimension_of_u)
 
-    # Perform the E-step 
-    trainer.initialize(isv_base, data, rng = algorithm.rng) #Just to reset the accumulators
+    # Perform the E-step     
+    trainer.initialize(isv_base, data_initialize, rng = algorithm.rng) #Just to reset the accumulators
     trainer.e_step(isv_base, data)
 
     # write results to file
@@ -130,8 +131,8 @@ def isv_mstep(algorithm, iteration, number_of_parallel_jobs, force=False, clean=
 
     # Creates the IVectorTrainer and initialize values
     trainer = algorithm.isv_trainer
-    data = [algorithm.read_gmm_stats(training_list[0])]#Loading data just to allocate memory
-    trainer.initialize(isv_base, data) #Just to allocate memory
+    data_initialize = [algorithm.read_gmm_stats(training_list[i]) for i in range(0,len(training_list))]
+    trainer.initialize(isv_base, data_initialize) #Just to allocate memory
     trainer.acc_u_a1 = statistics[0]
     trainer.acc_u_a2 = statistics[1]
     trainer.m_step(isv_base) # data is not used in M-step
