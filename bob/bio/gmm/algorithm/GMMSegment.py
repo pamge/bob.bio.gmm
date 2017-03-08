@@ -199,14 +199,12 @@ class GMM (Algorithm):
     self._check_feature(feature)
     return self.project_ubm(feature)
 
-  def save_gmm_stats(self, gmm_stats_list, gmm_stats_file):
+  def write_feature(self, gmm_stats_list, gmm_stats_file):
     """Saves GMM stats from returned list."""
-    f = bob.io.base.HDF5File(gmm_stats_file, 'a')
-    i = 0
-    for g in gmm_stats_list:
+    f = bob.io.base.HDF5File(gmm_stats_file, 'w')
+    for i, g in enumerate(gmm_stats_list):
       groupname = '/segment_' + str(i)
       f.create_group(groupname)
-      i += 1
       filename = groupname + groupname
       f.set(filename, g)
 
