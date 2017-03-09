@@ -175,7 +175,6 @@ class GMM (Algorithm):
     # Accumulates statistics
     gmm_stats = bob.learn.em.GMMStats(self.ubm.shape[0], self.ubm.shape[1])
     self.ubm.acc_statistics(array, gmm_stats)
-
     # return the resulting statistics
     return gmm_stats
 
