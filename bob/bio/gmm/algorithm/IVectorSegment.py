@@ -83,6 +83,12 @@ class IVectorSegment (IVector, GMMSegment):
     self.plda_dim_G = plda_dim_G
     self.plda_training_iterations = plda_training_iterations
 
+
+  def _check_ivector(self, feature):
+    """Checks that the features are appropriate"""
+    if not isinstance(feature, numpy.ndarray) or feature.dtype != numpy.float64:
+      raise ValueError("The given feature is not appropriate")
+
   def train_ivector(self, training_stats):
     logger.info("  -> Training IVector enroller")
     self.tv = bob.learn.em.IVectorMachine(self.ubm, self.subspace_dimension_of_t, self.variance_threshold)
@@ -249,3 +255,6 @@ class IVectorSegment (IVector, GMMSegment):
   def read_feature(self, feature_file):
     """Read the type of features that we require, namely i-vectors (stored as simple numpy arrays)"""
     return bob.bio.base.load(feature_file)
+
+  def score(self, model, probe):
+    print 'no scoring'
