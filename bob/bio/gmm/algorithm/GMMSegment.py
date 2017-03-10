@@ -92,14 +92,14 @@ class GMMSegment (GMM):
 
   def write_feature(self, gmm_stats_list, gmm_stats_file):
     """Saves GMM stats from returned list."""
-    f = bob.io.base.HDF5File(gmm_stats_file, 'w')
+    hdf5file = bob.io.base.HDF5File(gmm_stats_file, 'w')
     for i, g in enumerate(gmm_stats_list):
       groupname = '/segment_' + str(i)
-      f.create_group(groupname)
-      f.cd(groupname)
-      g.save(f)
-      f.cd('../')
-    f.close()
+      hdf5file.create_group(groupname)
+      hdf5file.cd(groupname)
+      g.save(hdf5file)
+      hdf5file.cd('../')
+    hdf5file.close()
 
   def project(self, feature):
     """Computes GMM statistics against a UBM, given an input 2D numpy.ndarray of feature vectors"""
@@ -107,11 +107,11 @@ class GMMSegment (GMM):
 
   def read_gmm_stats(self, gmm_stats_file):
     """Reads GMM stats from file."""
-    f = bob.io.base.HDF5File(gmm_stats_file)
+    hdf5file = bob.io.base.HDF5File(gmm_stats_file)
     gmm_stats_list = []
-    for grp in f.sub_groups():
-      f.cd(grp)
-      gmm_stats_list.append(bob.learn.em.GMMStats(f))
-      f.cd('..')
-    f.close()
+    for grp in hdf5file.sub_groups():
+      hdf5file.cd(grp)
+      gmm_stats_list.append(bob.learn.em.GMMStats(hdf5file))
+      hdf5file.cd('..')
+    hdf5file.close()
     return gmm_stats_list

@@ -3,6 +3,7 @@ from .GMMSegment import GMMSegment
 from .JFA import JFA
 from .ISV import ISV
 from .IVector import IVector
+from .IVectorSegment import IVectorSegment
 
 # gets sphinx autodoc done right - don't remove it
 def __appropriate__(*args):
