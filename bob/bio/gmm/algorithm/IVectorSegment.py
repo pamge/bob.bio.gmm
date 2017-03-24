@@ -15,23 +15,23 @@ from bob.bio.base.algorithm import Algorithm
 import logging
 logger = logging.getLogger("bob.bio.gmm")
 
-class IVectorSegment (IVector, GMMSegment):
+class IVectorSegment (GMMSegment, IVector):
   """Tool for extracting I-Vectors"""
 
   def __init__(
       self,
       # IVector training
       subspace_dimension_of_t,       # T subspace dimension
-      tv_training_iterations = 25,   # Number of EM iterations for the TV training
+      tv_training_iterations = 3,   # Number of EM iterations for the TV training
       update_sigma = True,
       use_whitening = False,
       use_lda = False,
       use_wccn = False,
       use_plda = False,
-      lda_dim = 50,
-      plda_dim_F  = 50,
-      plda_dim_G = 50,
-      plda_training_iterations = 50,
+      lda_dim = 2,
+      plda_dim_F  = 2,
+      plda_dim_G = 2,
+      plda_training_iterations = 2,
       # parameters of the GMM
       **kwargs
   ):
@@ -89,13 +89,6 @@ class IVectorSegment (IVector, GMMSegment):
     if not isinstance(feature, numpy.ndarray) or feature.dtype != numpy.float64:
       raise ValueError("The given feature is not appropriate")
 
-  def train_ivector(self, training_stats):
-    logger.info("  -> Training IVector enroller")
-    self.tv = bob.learn.em.IVectorMachine(self.ubm, self.subspace_dimension_of_t, self.variance_threshold)
-
-    # train IVector model
-    bob.learn.em.train(self.ivector_trainer, self.tv, training_stats, self.tv_training_iterations, rng=self.rng)
-
   def train_projector(self, train_features, projector_file):
     """Train Projector and Enroller at the same time"""
     
@@ -142,86 +135,8 @@ class IVectorSegment (IVector, GMMSegment):
     self.save_projector(projector_file)
 
 
-  def save_projector(self, projector_file):
-    # Save the IVector base AND the UBM AND the whitening into the same file
-    hdf5file = bob.io.base.HDF5File(projector_file, "w")
-    hdf5file.create_group('Projector')
-    hdf5file.cd('Projector')
-    self.save_ubm(hdf5file)
-
-    hdf5file.cd('/')
-    hdf5file.create_group('Enroller')
-    hdf5file.cd('Enroller')
-    self.tv.save(hdf5file)
-
-    if self.use_whitening:
-      hdf5file.cd('/')
-      hdf5file.create_group('Whitener')
-      hdf5file.cd('Whitener')
-      self.whitener.save(hdf5file)
-    
-    if self.use_lda:
-      hdf5file.cd('/')
-      hdf5file.create_group('LDA')
-      hdf5file.cd('LDA')
-      self.lda.save(hdf5file)
-
-    if self.use_wccn:
-      hdf5file.cd('/')
-      hdf5file.create_group('WCCN')
-      hdf5file.cd('WCCN')
-      self.wccn.save(hdf5file)
-            
-    if self.use_plda:
-      hdf5file.cd('/')
-      hdf5file.create_group('PLDA')
-      hdf5file.cd('PLDA')
-      self.plda_base.save(hdf5file)
-      
-
-  def load_tv(self, tv_file):
-    hdf5file = bob.io.base.HDF5File(tv_file)
-    self.tv = bob.learn.em.IVectorMachine(hdf5file)
-    # add UBM model from base class
-    self.tv.ubm = self.ubm
-    
-  def load_projector(self, projector_file):
-    """Load the GMM and the ISV model from the same HDF5 file"""
-    hdf5file = bob.io.base.HDF5File(projector_file)
-
-    # Load Projector
-    hdf5file.cd('/Projector')
-    self.load_ubm(hdf5file)
-
-    # Load Enroller
-    hdf5file.cd('/Enroller')
-    self.load_tv(hdf5file)
-
-    if self.use_whitening:
-      # Load Whitening
-      hdf5file.cd('/Whitener')
-      self.load_whitener(hdf5file)
-    
-    if self.use_lda:
-      # Load LDA
-      hdf5file.cd('/LDA')
-      self.load_lda(hdf5file)
-    
-    if self.use_wccn:    
-      # Load WCCN
-      hdf5file.cd('/WCCN')
-      self.load_wccn(hdf5file)
-
-    if self.use_plda:   
-     # Load PLDA
-      hdf5file.cd('/PLDA')
-      self.load_plda(hdf5file)
-
-
   def project_ivector(self, gmm_stats_list):
     tv_project = []
-    #import ipdb
-    #ipdb.set_trace()
     for gmm_stats in gmm_stats_list:
       tv_project.append(self.tv.project(gmm_stats))
     return tv_project
@@ -248,13 +163,6 @@ class IVectorSegment (IVector, GMMSegment):
 
   #######################################################
   ################## Read / Write I-Vectors ####################
-  def write_feature(self, data, feature_file):
-    """Saves the feature, which is the (whitened) I-Vector."""
-    bob.bio.base.save(data, feature_file)
-
-  def read_feature(self, feature_file):
-    """Read the type of features that we require, namely i-vectors (stored as simple numpy arrays)"""
-    return bob.bio.base.load(feature_file)
 
   def score(self, model, probe):
     print 'no scoring'

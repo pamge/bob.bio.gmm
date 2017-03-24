@@ -10,7 +10,7 @@ logger = logging.getLogger("bob.bio.gmm")
 from bob.bio.base.tools.FileSelector import FileSelector
 from bob.bio.base import utils, tools
 from .utils import read_feature
-
+from bob.bio.gmm.algorithm import GMMSegment
 
 def kmeans_initialize(algorithm, extractor, limit_data = None, force = False):
   """Initializes the K-Means training (non-parallel)."""
@@ -305,4 +305,10 @@ def gmm_project(algorithm, extractor, indices, force=False):
       projected = algorithm.project_ubm(feature)
       # write it
       bob.io.base.create_directories_safe(os.path.dirname(projected_file))
-      bob.bio.base.save(projected, projected_file)
+      # Open an issue with this example to write this part in a more elegant way
+      # when using the algorithm IVectorSegment, the projected is a list of GMMstats objects, in order to save these in a HDF5 file, on way is to call the write_feature function already implemented in bob.bio.gmm.algorithm.GMMSegment
+      # The test below is a hard coded one, which enable us to distinguish between a GMMstats object and a list of GMMstats objects
+      if isinstance(algorithm, GMMSegment):
+        GMMSegment.write_feature(algorithm, projected, projected_file)
+      else:
+        bob.bio.base.save(projected, projected_file)

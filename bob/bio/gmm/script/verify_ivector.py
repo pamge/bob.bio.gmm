@@ -55,7 +55,7 @@ def parse_arguments(command_line_parameters, exclude_resources_from = []):
   tools.initialize_parallel_gmm(args, sub_module = 'ivector')
 
   # assert that the algorithm is a GMM
-  if tools.base(args.algorithm).__class__ != algorithm.IVector:
+  if (tools.base(args.algorithm).__class__ != algorithm.IVector) and (tools.base(args.algorithm).__class__ != algorithm.IVectorSegment):
     raise ValueError("The given algorithm %s is not a (pure) IVector algorithm" % type(args.algorithm))
 
   # check if one of the parameters is given wothout the sub-task
