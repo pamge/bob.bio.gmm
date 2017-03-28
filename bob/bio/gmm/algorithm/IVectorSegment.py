@@ -141,6 +141,29 @@ class IVectorSegment (GMMSegment, IVector):
       tv_project.append(self.tv.project(gmm_stats))
     return tv_project
 
+  def project_whitening(self, ivector):
+    whitened_list = []
+    for ivec in ivector:
+      whitened = self.whitener.forward(ivec)
+      whitened_list.append(whitened / numpy.linalg.norm(whitened))
+    return whitened_list
+  
+  def project_lda(self, ivector):
+    out_ivector_list = []
+    for ivec in ivector:
+      out_ivector = numpy.ndarray(self.lda.shape[1], numpy.float64)
+      self.lda(ivec, out_ivector)
+      out_ivector_list.append(out_ivector)
+    return out_ivector_list
+
+  def project_wccn(self, ivector):
+    out_ivector_list = []
+    for ivec in ivector:
+      out_ivector = numpy.ndarray(self.wccn.shape[1], numpy.float64)
+      self.wccn(ivec, out_ivector)
+      out_ivector_list.append(out_ivector)
+    return out_ivector_list
+
   #######################################################
   ############## IVector projection #####################
   def project(self, feature_array):
@@ -165,4 +188,4 @@ class IVectorSegment (GMMSegment, IVector):
   ################## Read / Write I-Vectors ####################
 
   def score(self, model, probe):
-    print 'no scoring'
+    print('no scoring')

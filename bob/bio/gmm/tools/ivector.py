@@ -7,7 +7,7 @@ import shutil
 
 from bob.bio.base.tools.FileSelector import FileSelector
 from bob.bio.base import utils, tools
-
+from bob.bio.gmm.algorithm import GMMSegment
 
 
 def ivector_estep(algorithm, iteration, indices, force=False):
@@ -45,8 +45,6 @@ def ivector_estep(algorithm, iteration, indices, force=False):
     if isinstance(algorithm, GMMSegment):
       for g in data:
         trainer.e_step(tv,g)
-        print('####### Trainer ######### \n')
-        print(trainer)
     else:
       trainer.e_step(tv, data)
     
