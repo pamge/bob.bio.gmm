@@ -68,7 +68,7 @@ class GMMSegment (GMM):
 
 
   def project_ubm(self, array):
-    features_per_seg = 25000            # number of features per segment, the default value is 250, which means that if the window shift of mfcc is 10 ms, that means the duration of the segment is 2.5 s
+    features_per_seg = 250           # number of features per segment, the default value is 250, which means that if the window shift of mfcc is 10 ms, that means the duration of the segment is 2.5 s
     # array.shape[0] = number of MFCCs calculated on speech frame
     # array.shape[1] = dimension of MFCC features (ex. 60)
     # perform uniform linear segmentation on the feature sequence to obtain a segmented array

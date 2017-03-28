@@ -213,6 +213,8 @@ class IVector (GMM):
 
   def load_tv(self, tv_file):
     hdf5file = bob.io.base.HDF5File(tv_file)
+    if "/Enroller" in hdf5file.sub_groups():
+      hdf5file.cd("/Enroller")
     self.tv = bob.learn.em.IVectorMachine(hdf5file)
     # add UBM model from base class
     self.tv.ubm = self.ubm

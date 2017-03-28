@@ -138,6 +138,10 @@ class IVectorSegment (GMMSegment, IVector):
   def project_ivector(self, gmm_stats_list):
     tv_project = []
     for gmm_stats in gmm_stats_list:
+      print("##########################")
+      print(gmm_stats)
+      print(self)
+      print("##########################")
       tv_project.append(self.tv.project(gmm_stats))
     return tv_project
 

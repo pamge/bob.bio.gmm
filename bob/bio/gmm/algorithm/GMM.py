@@ -155,6 +155,8 @@ class GMM (Algorithm):
 
   def load_ubm(self, ubm_file):
     hdf5file = bob.io.base.HDF5File(ubm_file)
+    if "/Projector" in hdf5file.sub_groups():
+      hdf5file.cd("/Projector")
     # read UBM
     self.ubm = bob.learn.em.GMMMachine(hdf5file)
     self.ubm.set_variance_thresholds(self.variance_threshold)
