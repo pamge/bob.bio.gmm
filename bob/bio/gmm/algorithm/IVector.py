@@ -32,6 +32,8 @@ class IVector (GMM):
       plda_dim_F  = 50,
       plda_dim_G = 50,
       plda_training_iterations = 50,
+      # BioHashing parameter
+      requires_seed = False,
       # parameters of the GMM
       **kwargs
   ):
@@ -46,6 +48,7 @@ class IVector (GMM):
         use_projected_features_for_enrollment = True,
         requires_enroller_training = False, # not needed anymore because it's done while training the projector
         split_training_features_by_client = True,
+        requires_seed = False,  # ADDED BY VEDRANA FOR BIOHASHING
 
         subspace_dimension_of_t = subspace_dimension_of_t,
         tv_training_iterations = tv_training_iterations,
@@ -82,6 +85,8 @@ class IVector (GMM):
     self.plda_dim_F  = plda_dim_F
     self.plda_dim_G = plda_dim_G
     self.plda_training_iterations = plda_training_iterations
+
+    self.requires_seed = requires_seed  # ADDED BY VEDRANA FOR BIOHASHING
       
 
 
