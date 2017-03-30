@@ -95,7 +95,7 @@ def _accumulate(filenames):
     zeroeth += zeroeth_
     first += first_
     nsamples += nsamples_
-    dist += dist_
+    dist += dist_  
   return (zeroeth, first, nsamples, dist)
 
 def kmeans_mstep(algorithm, iteration, number_of_parallel_jobs, force=False, clean=False):

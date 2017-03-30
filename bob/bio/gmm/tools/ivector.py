@@ -39,7 +39,7 @@ def ivector_estep(algorithm, iteration, indices, force=False):
     # Load data
     training_list = fs.training_list('projected_gmm', 'train_projector')
     data = [algorithm.read_gmm_stats(training_list[i]) for i in range(indices[0], indices[1])]
-    print(data)
+
     # Perform the E-step
     # Test if data is a GMMstats object or a list of GMMstats objects
     if isinstance(algorithm, GMMSegment):

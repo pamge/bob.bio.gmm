@@ -81,7 +81,7 @@ class GMM (Algorithm):
     self.scoring_function = scoring_function
 
     self.ubm = None
-    self.kmeans_trainer = bob.learn.em.KMeansTrainer()
+    self.kmeans_trainer = bob.learn.em.KMeansTrainer('RANDOM_NO_DUPLICATE')
     self.ubm_trainer = bob.learn.em.ML_GMMTrainer(self.update_means, self.update_variances, self.update_weights, self.responsibility_threshold)
 
 

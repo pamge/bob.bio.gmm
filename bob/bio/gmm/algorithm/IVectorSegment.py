@@ -105,7 +105,6 @@ class IVectorSegment (GMMSegment, IVector):
     train_gmm_stats = [[GMMSegment.project_ubm(self, feature) for feature in client] for client in train_features]
     train_gmm_stats_flatten = [stats for client in train_gmm_stats for segments in client for stats in segments]
     
-
     # train IVector
     logger.info("  -> Projecting training data")
     self.train_ivector(train_gmm_stats_flatten)
@@ -138,10 +137,6 @@ class IVectorSegment (GMMSegment, IVector):
   def project_ivector(self, gmm_stats_list):
     tv_project = []
     for gmm_stats in gmm_stats_list:
-      print("##########################")
-      print(gmm_stats)
-      print(self)
-      print("##########################")
       tv_project.append(self.tv.project(gmm_stats))
     return tv_project
 
