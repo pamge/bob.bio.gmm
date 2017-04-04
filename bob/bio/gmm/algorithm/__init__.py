@@ -22,8 +22,10 @@ def __appropriate__(*args):
 __appropriate__(
     GMM,
     GMMRegular,
+    GMMSegment,
     JFA,
     ISV,
     IVector,
+    IVectorSegment
     )
 __all__ = [_ for _ in dir() if not _.startswith('_')]
