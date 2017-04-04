@@ -12,6 +12,8 @@ from bob.bio.gmm.algorithm import GMMSegment
 
 def ivector_estep(algorithm, iteration, indices, force=False):
   """Performs a single E-step of the IVector algorithm (parallel)"""
+  if indices[0] >= indices[1]:
+    return
   fs = FileSelector.instance()
   stats_file = fs.ivector_stats_file(iteration, indices[0], indices[1])
 

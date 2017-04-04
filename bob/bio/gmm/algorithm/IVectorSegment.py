@@ -22,7 +22,7 @@ class IVectorSegment (GMMSegment, IVector):
       self,
       # IVector training
       subspace_dimension_of_t,       # T subspace dimension
-      tv_training_iterations = 3,   # Number of EM iterations for the TV training
+      tv_training_iterations = 20,   # Number of EM iterations for the TV training
       update_sigma = True,
       use_whitening = False,
       use_lda = False,
