@@ -28,10 +28,10 @@ class IVectorSegment (GMMSegment, IVector):
       use_lda = False,
       use_wccn = False,
       use_plda = False,
-      lda_dim = 2,
-      plda_dim_F  = 2,
-      plda_dim_G = 2,
-      plda_training_iterations = 2,
+      lda_dim = 50,
+      plda_dim_F  = 20,
+      plda_dim_G = 20,
+      plda_training_iterations = 20,
       # parameters of the GMM
       **kwargs
   ):

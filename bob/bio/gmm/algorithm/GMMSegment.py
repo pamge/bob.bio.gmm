@@ -35,6 +35,8 @@ class GMMSegment (GMM):
       gmm_enroll_iterations = 1,    # Number of iterations for the enrollment phase
       responsibility_threshold = 0, # If set, the weight of a particular Gaussian will at least be greater than this threshold. In the case the real weight is lower, the prior mean value will be used to estimate the current mean and variance.
       INIT_SEED = 5489,
+      features_per_seg = 250,       # number of features per segment, the default value is 250, which means that if the window shift of mfcc is 10 ms, then the duration of the segment is 2.5 s
+      seg_overlap = 50,             # number of overlapped segments
       # scoring
       scoring_function = bob.learn.em.linear_scoring
   ):
@@ -59,6 +61,9 @@ class GMMSegment (GMM):
         scoring_function = str(scoring_function),
     )
 
+    self.features_per_seg = features_per_seg
+    self.seg_overlap = seg_overlap
+
   def _check_feature(self, feature):
     """Checks that the features are appropriate"""
     if not isinstance(feature, numpy.ndarray) or feature.ndim != 2 or feature.dtype != numpy.float64:
@@ -68,11 +73,10 @@ class GMMSegment (GMM):
 
 
   def project_ubm(self, array):
-    features_per_seg = 250           # number of features per segment, the default value is 250, which means that if the window shift of mfcc is 10 ms, that means the duration of the segment is 2.5 s
     # array.shape[0] = number of MFCCs calculated on speech frame
     # array.shape[1] = dimension of MFCC features (ex. 60)
     # perform uniform linear segmentation on the feature sequence to obtain a segmented array
-    segmented_array = [array[i:i+features_per_seg] for i in range(0, len(array), features_per_seg)]
+    segmented_array = [array[i:i+self.features_per_seg] for i in range(0, len(array), self.features_per_seg-self.seg_overlap)]
     # loop on the segmented array to calculate the sufficient statistics on each segment
     gmm_stats_list = []
     for seg in segmented_array:
