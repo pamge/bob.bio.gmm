@@ -55,7 +55,7 @@ class IVector_BioHash (IVector):
         return biohash.create_biohash(ivector, self.length, user_seed)
     else: # stolen token scenario, so user_seed will be some randomly generated number (same for every person in the database), specified in config file
         print "STOLEN TOKEN scenario user seed: %s\n" % (self.user_seed)
-        return biohash.create_biohash(self.ivector, self.length, self.user_seed)
+        return biohash.create_biohash(ivector, self.length, self.user_seed)
 
 
   def project(self, feature_array, user_seed):
