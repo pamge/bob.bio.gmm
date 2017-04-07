@@ -125,6 +125,70 @@ def test_gmm():
   assert abs(gmm1.score_for_multiple_probes(model, [probe, probe]) - reference_score) < 1e-5
 
 
+def test_gmm_segment():
+
+  temp_file = bob.io.base.test_utils.temporary_filename()
+  gmm1 = bob.bio.base.load_resource("gmm-segment", "algorithm", preferred_package='bob.bio.gmm')
+
+  assert isinstance(gmm1, bob.bio.gmm.algorithm.GMMSegment)
+  assert isinstance(gmm1, bob.bio.base.algorithm.Algorithm)
+  assert gmm1.performs_projection
+  assert gmm1.requires_projector_training
+  assert not gmm1.use_projected_features_for_enrollment
+  assert not gmm1.split_training_features_by_client
+  assert not gmm1.requires_enroller_training
+  
+  # create smaller GMM object
+  gmm2 = bob.bio.gmm.algorithm.GMMSegment(
+  number_of_gaussians = 2,
+  kmeans_training_iterations = 1,
+  gmm_training_iterations = 1,
+  features_per_seg = 10,
+  seg_overlap = 1,
+  INIT_SEED = seed_value,
+    )
+  
+  train_data = utils.random_training_set((100,45), count=5, minimum=-5., maximum=5.)
+  reference_file = pkg_resources.resource_filename('bob.bio.gmm.test', 'data/gmm_projector.hdf5')
+  try:
+    # train the projector
+    gmm2.train_projector(train_data, temp_file)
+  
+    assert os.path.exists(temp_file)
+  
+    if regenerate_refs: shutil.copy(temp_file, reference_file)
+    # check projection matrix
+    gmm1.load_projector(reference_file)
+    gmm2.load_projector(temp_file)
+  
+    assert gmm1.ubm.is_similar_to(gmm2.ubm)
+
+    # generate and project random feature
+    feature = utils.random_array((20,45), -5., 5., seed=84)
+    projected = gmm2.project(feature)
+    assert isinstance(projected, list)
+  
+    projected_ref = pkg_resources.resource_filename('bob.bio.gmm.test', 'data/gmmsegment_projected.hdf5')
+  
+    gmm1.write_feature(projected, temp_file)
+  
+    hdf5fileref = bob.io.base.HDF5File(projected_ref, 'r')
+    hdf5filetemp = bob.io.base.HDF5File(temp_file, 'r')
+  
+    for grp in hdf5fileref.sub_groups():
+      hdf5fileref.cd(grp)
+      hdf5filetemp.cd(grp)
+      for key in hdf5fileref.keys():
+        assert hdf5fileref.get(key).all() == hdf5filetemp.get(key).all()
+      hdf5fileref.cd("..")
+      hdf5filetemp.cd("..")
+    hdf5fileref.close()
+    hdf5filetemp.close()
+  
+  finally:
+    if os.path.exists(temp_file): os.remove(temp_file)
+    
+
 def test_gmm_regular():
 
   temp_file = bob.io.base.test_utils.temporary_filename()
