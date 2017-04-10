@@ -587,7 +587,7 @@ def test_ivector_lda_wccn_plda():
 def test_ivector_segment():
   
   temp_file = bob.io.base.test_utils.temporary_filename()
-  ivec1 = bob.bio.base.load_resource("ivec-segment", "algorithm", preferred_package='bob.bio.gmm')
+  ivec1 = bob.bio.base.load_resource("ivector-segment", "algorithm", preferred_package='bob.bio.gmm')
   assert isinstance(ivec1, bob.bio.gmm.algorithm.IVectorSegment)
   assert isinstance(ivec1, bob.bio.gmm.algorithm.GMMSegment)
   assert isinstance(ivec1, bob.bio.base.algorithm.Algorithm)

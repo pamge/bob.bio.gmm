@@ -121,12 +121,14 @@ setup(
 
       'bob.bio.algorithm': [
         'gmm                            = bob.bio.gmm.config.algorithm.gmm:algorithm',
+        'gmm-segment      = bob.bio.gmm.config.algorithm.gmm_segment:algorithm', # GMM config used to extract GMM statistics on a per-segment basis
         'gmm-regular               = bob.bio.gmm.config.algorithm.gmm_regular:algorithm',
         'jfa                                = bob.bio.gmm.config.algorithm.jfa:algorithm',
         'isv                                = bob.bio.gmm.config.algorithm.isv:algorithm',
         'ivector-cosine             = bob.bio.gmm.config.algorithm.ivector_cosine:algorithm',
         'ivector-plda                = bob.bio.gmm.config.algorithm.ivector_plda:algorithm',
         'ivector-lda-wccn-plda = bob.bio.gmm.config.algorithm.ivector_lda_wccn_plda:algorithm',
+        'ivector-segment  = bob.bio.gmm.config.algorithm.ivector_segment:algorithm', # IVectors calculated on a per-segment basis
       ],
    },
 
