@@ -185,6 +185,18 @@ class IVectorSegment (GMMSegment, IVector):
 
   #######################################################
   ################## Read / Write I-Vectors ####################
+  
+  # TODO:
+  # Solve the diamond heritance problem in more elegant way
+  # Some times the load_projector fucntion is not called from the IVector algorithm, here is a hard coded call for this specific function.
+  def load_projector(self, projector_file):
+    IVector.load_projector(self, projector_file)
+
+  def write_feature(self, data, feature_file):
+    IVector.write_feature(self, data, feature_file)
+
+  def read_feature(self, feature_file):
+    return IVector.read_feature(self, feature_file)
 
   def score(self, model, probe):
     print('no scoring')

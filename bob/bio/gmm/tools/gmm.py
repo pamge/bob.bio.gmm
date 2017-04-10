@@ -320,6 +320,8 @@ def gmm_project(algorithm, extractor, indices, force=False):
       projected = algorithm.project_ubm(feature)
       # write it
       bob.io.base.create_directories_safe(os.path.dirname(projected_file))
+      
+      # TODO: 
       # Open an issue with this example to write this part in a more elegant way
       # when using the algorithm IVectorSegment, the projected is a list of GMMstats objects, in order to save these in a HDF5 file, on way is to call the write_feature function already implemented in bob.bio.gmm.algorithm.GMMSegment
       # The test below is a hard coded one, which enable us to distinguish between a GMMstats object and a list of GMMstats objects

@@ -187,7 +187,7 @@ def test_gmm_segment():
   
   finally:
     if os.path.exists(temp_file): os.remove(temp_file)
-    
+
 
 def test_gmm_regular():
 
@@ -582,3 +582,54 @@ def test_ivector_lda_wccn_plda():
   reference_score = 0.338051
   assert abs(ivec1.score(model, probe) - reference_score) < 1e-5, "The scores differ: %3.8f, %3.8f" % (ivec1.score(model, probe), reference_score)
   assert abs(ivec1.score_for_multiple_probes(model, [probe, probe]) - reference_score) < 1e-5
+
+
+def test_ivector_segment():
+  
+  temp_file = bob.io.base.test_utils.temporary_filename()
+  ivec1 = bob.bio.base.load_resource("ivec-segment", "algorithm", preferred_package='bob.bio.gmm')
+  assert isinstance(ivec1, bob.bio.gmm.algorithm.IVectorSegment)
+  assert isinstance(ivec1, bob.bio.gmm.algorithm.GMMSegment)
+  assert isinstance(ivec1, bob.bio.base.algorithm.Algorithm)
+  assert ivec1.performs_projection
+  assert ivec1.requires_projector_training
+  
+  # create smaller ivector object
+  ivec2 = bob.bio.gmm.algorithm.IVectorSegment(
+      number_of_gaussians = 2,
+      subspace_dimension_of_t = 2,
+      kmeans_training_iterations = 1,
+      tv_training_iterations = 1,
+      features_per_seg = 10,       # number of features per segment, the default value is 250, which means that if the window shift of mfcc is 10 ms, then the duration of the segment is 2.5 s
+      seg_overlap = 1,             # number of overlapped segments
+      INIT_SEED = seed_value
+  )
+  
+  train_data = utils.random_training_set((100,45), count=5, minimum=-5., maximum=5.)
+  train_data = [train_data]
+  
+  # reference is the same as for GMM projection
+  reference_file = pkg_resources.resource_filename('bob.bio.gmm.test', 'data/ivectorsegment_projector.hdf5')
+  
+  try:
+    # train the projector
+  
+    ivec2.train_projector(train_data, temp_file)
+  
+    assert os.path.exists(temp_file)
+  
+    if regenerate_refs: shutil.copy(temp_file, reference_file)
+  
+    # check projection matrix
+    ivec1.load_projector(reference_file)
+    ivec2.load_projector(temp_file)
+  
+    assert ivec1.ubm.is_similar_to(ivec2.ubm)
+    assert ivec1.tv.is_similar_to(ivec2.tv)
+  finally:
+    if os.path.exists(temp_file): os.remove(temp_file)
+  
+  # generate and project random feature
+  feature = utils.random_array((20,45), -5., 5., seed=84)
+  projected = ivec2.project(feature)
+  _compare(projected, pkg_resources.resource_filename('bob.bio.gmm.test', 'data/ivectorsegment_projected.hdf5'), ivec2.write_feature, ivec2.read_feature)
