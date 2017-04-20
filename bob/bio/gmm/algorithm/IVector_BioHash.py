@@ -8,17 +8,6 @@ import numpy
 import bob.bio.base
 import scipy
 
-def load_algorithm(algorithm):
-    if algorithm is None:
-        raise ValueError("Please provide the name of a valid algorithm.")
-    elif isinstance(algorithm, str):
-        algorithm = bob.bio.base.load_resource(algorithm, 'algorithm')
-    elif isinstance(algorithm, Algorithm):
-        algorithm = algorithm
-    else:
-        raise ValueError("The provided algorithm type is not understood.")
-
-    return algorithm
 
 
 class IVector_BioHash (IVector):
@@ -29,18 +18,18 @@ class IVector_BioHash (IVector):
     IVector.__init__(
       self, 
       requires_seed = True, 
-      subspace_dimension_of_t = subspace_dimension_of_t, # dim of ivector - try setting to 400
+      subspace_dimension_of_t = subspace_dimension_of_t, # dimension of ivector 
       update_sigma = True,
       tv_training_iterations = 25,  # Number of EM iterations for the TV training
       number_of_gaussians = 256, 
       training_threshold = 0.0, 
-      use_lda = use_lda, # F
-      use_wccn = use_wccn, # F
-      use_plda = use_plda, # F
+      use_lda = use_lda, 
+      use_wccn = use_wccn,
+      use_plda = use_plda, 
       lda_dim = 50,
-      plda_dim_F = 10, # remove
+      plda_dim_F = 10, 
       plda_dim_G = 50,
-      plda_training_iterations = 200, # remove
+      plda_training_iterations = 200, 
       **kwargs)
     # Initializing attributes of child class, IVector_BioHash
     self.length = length
