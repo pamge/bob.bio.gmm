@@ -24,7 +24,7 @@ def kmeans_initialize(algorithm, extractor, limit_data = None, force = False):
     # read data
     logger.info("UBM training: initializing kmeans")
     training_list = utils.selected_elements(fs.training_list('extracted', 'train_projector'), limit_data)
-    data = numpy.vstack([read_feature(extractor, feature_file) for feature_file in training_list])
+    data = numpy.concatenate((numpy.atleast_2d(read_feature(extractor, feature_file)) for feature_file in training_list), 0)
 
     # Perform KMeans initialization
     kmeans_machine = bob.learn.em.KMeansMachine(algorithm.gaussians, data.shape[1])
@@ -56,7 +56,7 @@ def kmeans_estep(algorithm, extractor, iteration, indices, force=False):
     logger.info("UBM training: KMeans E-Step round %d from range(%d, %d)", iteration, *indices)
 
     # read data
-    data = numpy.vstack([read_feature(extractor, training_list[index]) for index in range(indices[0], indices[1])])
+    data = numpy.concatenate((numpy.atleast_2d(read_feature(extractor, training_list[index])) for index in range(indices[0], indices[1])), 0)
 
     # Performs the E-step
     trainer = algorithm.kmeans_trainer
@@ -170,7 +170,7 @@ def gmm_initialize(algorithm, extractor, limit_data = None, force = False):
 
     # read features
     training_list = utils.selected_elements(fs.training_list('extracted', 'train_projector'), limit_data)
-    data = numpy.vstack([read_feature(extractor, feature_file) for feature_file in training_list])
+    data = numpy.concatenate((numpy.atleast_2d(read_feature(extractor, feature_file)) for feature_file in training_list), 0)
 
     # get means and variances of kmeans result
     kmeans_machine = bob.learn.em.KMeansMachine(bob.io.base.HDF5File(fs.kmeans_file))
@@ -210,7 +210,7 @@ def gmm_estep(algorithm, extractor, iteration, indices, force=False):
     logger.info("UBM training: GMM E-Step from range(%d, %d)", *indices)
 
     # read data
-    data = numpy.vstack([read_feature(extractor, training_list[index]) for index in range(indices[0], indices[1])])
+    data = numpy.concatenate((numpy.atleast_2d(read_feature(extractor, training_list[index])) for index in range(indices[0], indices[1])), 0)
     trainer = algorithm.ubm_trainer
     trainer.initialize(gmm_machine, None)
 
