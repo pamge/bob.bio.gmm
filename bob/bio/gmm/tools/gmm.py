@@ -24,7 +24,22 @@ def kmeans_initialize(algorithm, extractor, limit_data = None, force = False):
     # read data
     logger.info("UBM training: initializing kmeans")
     training_list = utils.selected_elements(fs.training_list('extracted', 'train_projector'), limit_data)
-    data = numpy.concatenate((numpy.atleast_2d(read_feature(extractor, feature_file)) for feature_file in training_list), 0)
+    # read one feature to get the dtype
+    one_feature = read_feature(extractor, training_list[0])
+    one_feature = np.atleast_2d(one_feature)
+    dtype = one_feature.dtype
+    shape = one_feature.shape
+    size = one_feature.size
+    # assuming all features have the same size
+    total_size = size * len(training_list)
+    iterable = (x for feature_file in training_list
+                for x in numpy.atleast_2d(read_feature(extractor,
+                                                       feature_file)).flat)
+    data = numpy.fromiter(iterable, dtype, total_size)
+    # now let's resize the data back
+    new_shape = list(shape)
+    new_shape[0] = new_shape[0] * len(training_list)
+    data = data.reshape(new_shape)
 
     # Perform KMeans initialization
     kmeans_machine = bob.learn.em.KMeansMachine(algorithm.gaussians, data.shape[1])
