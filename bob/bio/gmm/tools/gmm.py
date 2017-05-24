@@ -70,8 +70,22 @@ def kmeans_estep(algorithm, extractor, iteration, indices, force=False):
 
     logger.info("UBM training: KMeans E-Step round %d from range(%d, %d)", iteration, *indices)
 
-    # read data
-    data = numpy.concatenate((numpy.atleast_2d(read_feature(extractor, training_list[index])) for index in range(indices[0], indices[1])), 0)
+    # read one feature to get the dtype
+    one_feature = read_feature(extractor, training_list[indices[0]])
+    one_feature = numpy.atleast_2d(one_feature)
+    dtype = one_feature.dtype
+    shape = one_feature.shape
+    size = one_feature.size
+    # assuming all features have the same size
+    total_size = size * len(range(indices[0], indices[1]))
+    iterable = (x for index in range(indices[0], indices[1])
+                for x in numpy.atleast_2d(read_feature(
+                    extractor, training_list[index])).flat)
+    data = numpy.fromiter(iterable, dtype, total_size)
+    # now let's resize the data back
+    new_shape = list(shape)
+    new_shape[0] = new_shape[0] * len(range(indices[0], indices[1]))
+    data = data.reshape(new_shape)
 
     # Performs the E-step
     trainer = algorithm.kmeans_trainer
@@ -185,7 +199,22 @@ def gmm_initialize(algorithm, extractor, limit_data = None, force = False):
 
     # read features
     training_list = utils.selected_elements(fs.training_list('extracted', 'train_projector'), limit_data)
-    data = numpy.concatenate((numpy.atleast_2d(read_feature(extractor, feature_file)) for feature_file in training_list), 0)
+    # read one feature to get the dtype
+    one_feature = read_feature(extractor, training_list[0])
+    one_feature = numpy.atleast_2d(one_feature)
+    dtype = one_feature.dtype
+    shape = one_feature.shape
+    size = one_feature.size
+    # assuming all features have the same size
+    total_size = size * len(training_list)
+    iterable = (x for feature_file in training_list
+                for x in numpy.atleast_2d(read_feature(extractor,
+                                                       feature_file)).flat)
+    data = numpy.fromiter(iterable, dtype, total_size)
+    # now let's resize the data back
+    new_shape = list(shape)
+    new_shape[0] = new_shape[0] * len(training_list)
+    data = data.reshape(new_shape)
 
     # get means and variances of kmeans result
     kmeans_machine = bob.learn.em.KMeansMachine(bob.io.base.HDF5File(fs.kmeans_file))
@@ -224,8 +253,23 @@ def gmm_estep(algorithm, extractor, iteration, indices, force=False):
 
     logger.info("UBM training: GMM E-Step from range(%d, %d)", *indices)
 
-    # read data
-    data = numpy.concatenate((numpy.atleast_2d(read_feature(extractor, training_list[index])) for index in range(indices[0], indices[1])), 0)
+    # read one feature to get the dtype
+    one_feature = read_feature(extractor, training_list[indices[0]])
+    one_feature = numpy.atleast_2d(one_feature)
+    dtype = one_feature.dtype
+    shape = one_feature.shape
+    size = one_feature.size
+    # assuming all features have the same size
+    total_size = size * len(range(indices[0], indices[1]))
+    iterable = (x for index in range(indices[0], indices[1])
+                for x in numpy.atleast_2d(read_feature(
+                    extractor, training_list[index])).flat)
+    data = numpy.fromiter(iterable, dtype, total_size)
+    # now let's resize the data back
+    new_shape = list(shape)
+    new_shape[0] = new_shape[0] * len(range(indices[0], indices[1]))
+    data = data.reshape(new_shape)
+
     trainer = algorithm.ubm_trainer
     trainer.initialize(gmm_machine, None)
 
