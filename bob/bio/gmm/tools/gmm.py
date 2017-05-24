@@ -26,7 +26,7 @@ def kmeans_initialize(algorithm, extractor, limit_data = None, force = False):
     training_list = utils.selected_elements(fs.training_list('extracted', 'train_projector'), limit_data)
     # read one feature to get the dtype
     one_feature = read_feature(extractor, training_list[0])
-    one_feature = np.atleast_2d(one_feature)
+    one_feature = numpy.atleast_2d(one_feature)
     dtype = one_feature.dtype
     shape = one_feature.shape
     size = one_feature.size
