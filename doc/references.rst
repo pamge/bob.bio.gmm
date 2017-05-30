@@ -2,4 +2,4 @@
 References
 ==========
 
-.. todo:: Provide the correct references for the algorithms defined in this package.
+.. [Reynolds2000] *Reynolds, Douglas A., Thomas F. Quatieri, and Robert B. Dunn*. **Speaker Verification Using Adapted Gaussian Mixture Models**, Digital signal processing 10.1 (2000): 19-41.
