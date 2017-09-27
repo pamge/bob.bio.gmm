@@ -16,7 +16,23 @@ import logging
 logger = logging.getLogger("bob.bio.gmm")
 
 class ISV (GMM):
-  """Tool for computing Unified Background Models and Gaussian Mixture Models of the features"""
+  """
+  Performs biometric recognition using Intersession Variability Modelling (ISV) from [Cool2013]_
+
+  **Parameters**
+    subspace_dimension_of_u:
+       Dimension of the subspace :math:`U` that contains all possible session effects
+
+    isv_training_iterations:
+       Number of EM iterations for the estimation of :math:`U`
+       
+    isv_enroll_iterations:
+       Number of iterations for the MAP adaptation
+
+    multiple_probe_scoring:
+      Scoring when multiple probe files are available
+  
+  """
 
 
   def __init__(

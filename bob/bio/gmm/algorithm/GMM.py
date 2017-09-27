@@ -15,8 +15,51 @@ import logging
 logger = logging.getLogger("bob.bio.gmm")
 
 class GMM (Algorithm):
-  """Algorithm for computing Universal Background Models and Gaussian Mixture Models of the features.
-  Features must be normalized to zero mean and unit standard deviation."""
+  """
+  Performs biometric recognition using adapted Gaussian Mixture Models from [Rey2000]_
+  
+  **Parameters**
+  
+      number_of_gaussians:
+         Number of Gaussians
+         
+      kmeans_training_iterations:
+         Number of iterations for the kmeans
+         
+      gmm_training_iterations:
+         Number of iterations for the Maximum Likelihood (MLE) estimation 
+         
+      training_threshold:
+         Convergence threshold
+         
+      variance_threshold:
+         GMM variance flooring
+
+      update_weights:
+         Update the gaussian weights during the training?
+         
+      update_means:
+         Update of the gaussian means during the training?
+         
+      update_variances:
+         update of the gaussian variances during the training?
+
+      relevance_factor:
+         Maximum a Posteriori (MAP) relevance factor
+         
+      gmm_enroll_iterations:
+         Number of iterations for the MAP adaptation
+         
+      responsibility_threshold:
+         If set, the weight of a particular Gaussian will at least be greater than this threshold. In the case the real weight is lower, the prior mean value will be used to estimate the current mean and variance.
+         
+      INIT_SEED:
+         Seed for the KMeans training
+
+      scoring_function:
+         Scoring function
+    
+  """
 
   def __init__(
       self,
@@ -38,7 +81,6 @@ class GMM (Algorithm):
       # scoring
       scoring_function = bob.learn.em.linear_scoring
   ):
-    """Initializes the local UBM-GMM tool chain with the given file selector object"""
 
     # call base class constructor and register that this tool performs projection
     Algorithm.__init__(
@@ -93,12 +135,20 @@ class GMM (Algorithm):
       raise ValueError("The given feature is expected to have %d elements, but it has %d" % (self.ubm.shape[1], feature.shape[1]))
 
 
-
-
   #######################################################
   ################ UBM training #########################
 
   def train_ubm(self, array):
+    """
+    Trains the Universal Background Model (UBM).
+    This training consists in 2 parts.
+    First the gaussian components are estimated via Kmeans and then it's refined via Maximum Likellyhood estimation
+    
+    **Parameters:**
+    
+      array:
+         Input data 
+    """  
 
     logger.debug(" .... Training with %d feature vectors", array.shape[0])
 
@@ -129,7 +179,14 @@ class GMM (Algorithm):
 
 
   def save_ubm(self, projector_file):
-    """Save projector to file"""
+    """
+    Save the UBM in a file
+    
+    **Parameters:**
+
+       projector_file: 
+          Name of the file
+    """
     # Saves the UBM to file
     logger.debug(" .... Saving model to file '%s'", projector_file)
     hdf5 = projector_file if isinstance(projector_file, bob.io.base.HDF5File) else bob.io.base.HDF5File(projector_file, 'w')
@@ -137,7 +194,10 @@ class GMM (Algorithm):
 
 
   def train_projector(self, train_features, projector_file):
-    """Computes the Universal Background Model from the training ("world") data"""
+    """
+    Trains the Universal Background Model (UBM) using :py:func:`train_ubm` and save it :py:func:`train_projector`
+    
+    """
     [self._check_feature(feature) for feature in train_features]
 
     logger.info("  -> Training UBM model with %d training files", len(train_features))
@@ -154,6 +214,15 @@ class GMM (Algorithm):
   ############## GMM training using UBM #################
 
   def load_ubm(self, ubm_file):
+    """
+    Load the UBM from file
+    
+    **Parameters:**
+
+       ubm_file: 
+          Name of the file
+    """
+  
     hdf5file = bob.io.base.HDF5File(ubm_file)
     # read UBM
     self.ubm = bob.learn.em.GMMMachine(hdf5file)
@@ -161,7 +230,15 @@ class GMM (Algorithm):
 
 
   def load_projector(self, projector_file):
-    """Reads the UBM model from file"""
+    """
+    Load the UBM from file using :py:func:`load_ubm` and set the MAP trainer
+    
+    **Parameters:**
+
+       ubm_file: 
+          Name of the file
+    """
+
     # read UBM
     self.load_ubm(projector_file)
     # prepare MAP_GMM_Trainer
@@ -171,6 +248,15 @@ class GMM (Algorithm):
 
 
   def project_ubm(self, array):
+    """
+    Compute the GMM Statistics (:py:class:`bob.learn.em.GMMStats`) given an input data
+    
+    **Parameters:**
+
+       array: 
+          Input data
+    """
+
     logger.debug(" .... Projecting %d feature vectors" % array.shape[0])
     # Accumulates statistics
     gmm_stats = bob.learn.em.GMMStats(self.ubm.shape[0], self.ubm.shape[1])
@@ -181,20 +267,32 @@ class GMM (Algorithm):
 
 
   def project(self, feature):
-    """Computes GMM statistics against a UBM, given an input 2D numpy.ndarray of feature vectors"""
+    """
+    Computes GMM statistics against a UBM, given an input 2D numpy.ndarray of feature vectors
+    """
     self._check_feature(feature)
     return self.project_ubm(feature)
 
 
   def read_gmm_stats(self, gmm_stats_file):
-    """Reads GMM stats from file."""
+    """
+    Reads GMM stats from file.
+    """
     return bob.learn.em.GMMStats(bob.io.base.HDF5File(gmm_stats_file))
 
   def read_feature(self, feature_file):
-    """Read the type of features that we require, namely GMM_Stats"""
+    """
+    Read the type of features that we require, namely GMM_Stats
+    """
     return self.read_gmm_stats(feature_file)
 
   def enroll_gmm(self, array):
+    """
+    Enrolls a GMM using MAP adaptation, given a list of 2D numpy.ndarray's of feature vectors
+    
+    **Parameters**
+      array: Input data
+    """  
     logger.debug(" .... Enrolling with %d feature vectors", array.shape[0])
 
     gmm = bob.learn.em.GMMMachine(self.ubm)
@@ -235,7 +333,10 @@ class GMM (Algorithm):
 
 
 class GMMRegular (GMM):
-  """Algorithm for computing Universal Background Models and Gaussian Mixture Models of the features"""
+  """
+    Trains the Universal Background Model (UBM).
+    This one performs the traditional scoring function.
+  """
 
   def __init__(self, **kwargs):
     """Initializes the local UBM-GMM tool chain with the given file selector object"""

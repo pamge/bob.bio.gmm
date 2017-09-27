@@ -35,9 +35,9 @@ Reference Manual
 
    implemented
    py_api
+   references
 
 
-.. include:: references.rst
 
 =========
 ToDo-List
