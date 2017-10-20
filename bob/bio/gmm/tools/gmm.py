@@ -215,21 +215,6 @@ def gmm_estep(algorithm, extractor, iteration, indices, force=False):
     trainer.initialize(gmm_machine, None)
 
     # Calls the E-step and extracts the GMM statistics
-    print("################################################################################################################\n")
-    print("file selector", fs)
-    print("\n")
-    print("stats file: ", stats_file)
-    print("\n")
-    print("extractor:", extractor)
-    print("\n")
-    print("shape of the data: ", data.shape, "\n")
-    for i in numpy.isinf(data):
-      if i.any():
-        print('Infinity Value !!!!!!!!\n')
-    for j in numpy.isnan(data):
-      if j.any():
-        print('NAN Value !!!!!!!!\n')
-    print("################################################################################################################\n")
     algorithm.ubm_trainer.e_step(gmm_machine, data)
     gmm_stats = algorithm.ubm_trainer.gmm_statistics
 
